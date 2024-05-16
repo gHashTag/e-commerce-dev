@@ -1,0 +1,5 @@
+.env
+.env.local
+
+supabase/functions/.env.local
+supabase/functions/.env
