@@ -7,6 +7,7 @@ import {
   HttpError,
 } from "https://deno.land/x/grammy@v1.8.3/mod.ts";
 import {
+  bugCatcherRequest,
   eCommerceDevBot,
   handleUpdateECommerceDev,
 } from "../_shared/utils/telegram/bots.ts";
@@ -20,13 +21,20 @@ console.log("Hello from E-commerce Dev!");
 await eCommerceDevBot.api.setMyCommands([
   {
     command: "/start",
-    description: "Start chatting with Ai Koshey",
+    description: "Start chatting with E-commerce Dev",
   },
   // {
   //   command: "/room",
   //   description: "Create a room",
   // },
 ]);
+
+eCommerceDevBot.command("start", async (ctx: Context) => {
+  console.log("start"); // Вывод в консоль сообщения "start"
+  await ctx.replyWithChatAction("typing"); // Отправка действия набора сообщения в чате
+
+  await ctx.reply("Hello! I am E-commerce Dev bot. Ask me anything!");
+});
 
 eCommerceDevBot.on("message:text", async (ctx) => {
   await ctx.replyWithChatAction("typing");
