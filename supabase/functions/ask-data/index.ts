@@ -6,7 +6,6 @@ import { supabase } from "../_shared/supabase/index.ts";
 
 import { getCompletion, model, tokenizer } from "../_shared/supabase/ai.ts";
 import { corsHeaders } from "../_shared/handleCORS.ts";
-import { openai } from "../_shared/openai/client.ts";
 
 serve(async (req: Request) => {
   // ask-custom-data logic
@@ -15,12 +14,12 @@ serve(async (req: Request) => {
   }
 
   // Search query is passed in request payload
-  const { query, table_name } = await req.json();
+  const { query, rpc_function_name, language_code } = await req.json();
   console.log(query, "query");
   // OpenAI recommends replacing newlines with spaces for best results
   const input = query.replace(/\n/g, " ");
   console.log(input, "input");
-  console.log(table_name, "table_name");
+  console.log(rpc_function_name, "rpc_function_name");
 
   const embedding = await model.run(input, {
     mean_pool: true,
@@ -29,7 +28,7 @@ serve(async (req: Request) => {
 
   // Query embeddings.
   const { data: items, error: itemsError } = await supabase
-    .rpc("match_amazon_documents", {
+    .rpc(rpc_function_name, {
       embedding_vector: JSON.stringify(embedding),
       match_threshold: 0.8,
       match_count: 4,
@@ -74,7 +73,7 @@ serve(async (req: Request) => {
   }
 
   const prompt = stripIndent`${oneLine`
-  You are a neural marketplace assistant! Always answer honestly and be as helpful as possible! Your name is E-commerce Dev and your main task is to help users sell more of their products and help them find hit products on different marketplaces."`}
+  You are a neural marketplace assistant! Always answer honestly and be as helpful as possible! Your name is E-commerce Dev and your main task is to help users sell more of their products and help them find hit products on different marketplaces. Respond in ${language_code} language."`}
     Context sections:
     ${contextText}
     Question: """

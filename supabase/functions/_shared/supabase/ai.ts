@@ -46,21 +46,12 @@ export async function getAiFeedback(
   return result.text;
 }
 
-interface Task {
-  id: number;
-  user_id: string;
-  title: string;
-  description: string;
-  created_at: string;
-  updated_at: string;
-}
-
 export async function getAiFeedbackFromSupabase(
-  { query, table_name }: getAiSupabaseFeedbackT,
+  { query, rpc_function_name, language_code }: getAiSupabaseFeedbackT,
 ): Promise<{ content: string; items: any; data: any }> {
   try {
     const { data: dataItems } = await supabase.functions.invoke("ask-data", {
-      body: JSON.stringify({ query, table_name }),
+      body: JSON.stringify({ query, rpc_function_name, language_code }),
     });
 
     console.log(dataItems, "dataItems");

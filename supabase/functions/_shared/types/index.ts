@@ -305,5 +305,6 @@ export interface Filter {
 
 export interface getAiSupabaseFeedbackT {
   query: string;
-  table_name: string;
+  rpc_function_name: string;
+  language_code: string;
 }

@@ -13,7 +13,7 @@ console.log("Hello from Functions!");
 
 Deno.serve(async (req) => {
   try {
-    const table_name = "allegro_documents";
+    const table_name = "ecommerce_documents";
     const { data, error } = await supabase
       .from(table_name)
       .select("*");
@@ -23,19 +23,20 @@ Deno.serve(async (req) => {
       for (const item of data) {
         // console.log("item.title", item.title);
         // console.log(content, "content");
-        console.log(item, "item");
-        console.log(item.embedding, "item.embedding");
-        console.log(item.embedding === null, "item.embedding === null");
+        // console.log(item, "item");
+        // console.log(item.embedding, "item.embedding");
+        // console.log(item.embedding === null, "item.embedding === null");
 
         if (
-          item.embedding !== null
+          item.embedding === null
         ) {
+          // console.log(item.id, "item.id");
           // Generate embedding
           const newEmbedding = await model.run(item.content, {
             mean_pool: true,
             normalize: true,
           });
-          console.log(newEmbedding, "newEmbedding");
+          // console.log(newEmbedding, "newEmbedding");
           // Store in DB
           const { data, error } = await supabase.from(table_name)
             .update({
@@ -44,8 +45,11 @@ Deno.serve(async (req) => {
               "id",
               item.id,
             ).select("*").single();
-          console.log(data.title, "data.title");
-          console.log("Embedding is empty or contains only zeros");
+          // console.log(data.title, "data.title");
+          console.log(data.id, "data.id");
+          // console.log("Embedding is empty or contains only zeros");
+        } else {
+          console.log("Found with embedding");
         }
       }
     } else {

@@ -15,7 +15,7 @@ import { getAiFeedbackFromSupabase } from "../_shared/supabase/ai.ts";
 // Setup type definitions for built-in Supabase Runtime APIs
 /// <reference types="https://esm.sh/@supabase/functions-js/src/edge-runtime.d.ts" />
 
-console.log("Hello from Functions!");
+console.log("Hello from E-commerce Dev!");
 
 await eCommerceDevBot.api.setMyCommands([
   {
@@ -31,12 +31,14 @@ await eCommerceDevBot.api.setMyCommands([
 eCommerceDevBot.on("message:text", async (ctx) => {
   await ctx.replyWithChatAction("typing");
   const query = ctx?.message?.text;
-  console.log(query, "query");
+
+  const language_code = ctx.from.language_code || "en";
 
   if (query) {
     const { content } = await getAiFeedbackFromSupabase({
       query,
-      table_name: "products",
+      rpc_function_name: "match_amazon_documents",
+      language_code,
     });
     await ctx.reply(content, { parse_mode: "Markdown" });
     return;
@@ -82,3 +84,5 @@ Deno.serve(async (req) => {
     --data '{"name":"Functions"}'
 
 */
+
+// supabase functions deploy e-commerce-dev --no-verify-jwt
