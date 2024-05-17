@@ -30,26 +30,46 @@ await eCommerceDevBot.api.setMyCommands([
 ]);
 
 eCommerceDevBot.command("start", async (ctx: Context) => {
-  console.log("start"); // Вывод в консоль сообщения "start"
-  await ctx.replyWithChatAction("typing"); // Отправка действия набора сообщения в чате
+  try {
+    console.log("start"); // Вывод в консоль сообщения "start"
+    await ctx.replyWithChatAction("typing"); // Отправка действия набора сообщения в чате
 
-  await ctx.reply("Hello! I am E-commerce Dev bot. Ask me anything!");
+    await ctx.reply("Hello! I am E-commerce Dev bot. Ask me anything!");
+    return;
+  } catch (error) {
+    throw new Error("Error while handling start command", { cause: error });
+  }
 });
 
+eCommerceDevBot.start();
+
 eCommerceDevBot.on("message:text", async (ctx) => {
-  await ctx.replyWithChatAction("typing");
-  const query = ctx?.message?.text;
+  try {
+    await ctx.replyWithChatAction("typing");
+    const query = ctx?.message?.text;
 
-  const language_code = ctx.from.language_code || "en";
+    const language_code = ctx.from.language_code || "en";
 
-  if (query) {
-    const { content } = await getAiFeedbackFromSupabase({
-      query,
-      rpc_function_name: "match_amazon_documents",
-      language_code,
-    });
-    await ctx.reply(content, { parse_mode: "Markdown" });
-    return;
+    const marketplace = "amazon";
+
+    if (query) {
+      const { content, items } = await getAiFeedbackFromSupabase({
+        query,
+        rpc_function_name: `match_${marketplace}_documents`,
+        language_code,
+      });
+
+      let response = `${content}\n\n`;
+
+      items.forEach((item: any) => {
+        response += `*${item.title}*\n${item.url}\n\n`;
+      });
+
+      await ctx.reply(response, { parse_mode: "Markdown" });
+      return;
+    }
+  } catch (error) {
+    throw new Error("Error while handling message", { cause: error });
   }
 });
 
@@ -77,7 +97,7 @@ Deno.serve(async (req) => {
 
     return await handleUpdateECommerceDev(req);
   } catch (err) {
-    console.error(err);
+    throw new Error("Error while handling request", { cause: err });
   }
 });
 
