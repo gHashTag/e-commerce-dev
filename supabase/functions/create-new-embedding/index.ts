@@ -13,7 +13,7 @@ console.log("Hello from Functions!");
 
 Deno.serve(async (req) => {
   try {
-    const table_name = "ecommerce_documents";
+    const { table_name } = await req.json();
     const { data, error } = await supabase
       .from(table_name)
       .select("*");
@@ -122,3 +122,4 @@ Deno.serve(async (req) => {
     --data '{"name":"Functions"}'
 
 */
+// supabase functions deploy create-new-embedding --no-verify-jwt

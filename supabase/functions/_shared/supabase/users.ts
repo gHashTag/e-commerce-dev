@@ -10,10 +10,10 @@ import { supabase } from "./index.ts";
 
 export async function createUser(
   ctx: UserContext,
-): Promise<UserData[] | Response | void> {
+): Promise<UserData[] | void> {
   try {
     const { first_name, last_name, username, is_bot, language_code, id } =
-      ctx.update.message.from;
+      ctx
 
     const { data: existingUser, error } = await supabase
       .from("users")
@@ -34,8 +34,8 @@ export async function createUser(
       first_name,
       last_name,
       username,
-      is_bot,
-      language_code,
+      is_bot: false,
+      language_code: "en",
       telegram_id: id,
       email: "",
       photo_url: "",
@@ -92,7 +92,7 @@ export const createUserInDatabase = async (
   try {
     await supabase.from("users").insert([newUser]);
     const user = await getSupabaseUser(newUser.username || "");
-    console.log(user, "user");
+    // console.log(user, "user");
     return user;
   } catch (error) {
     throw new Error("Error createUserInDatabase: " + error);
@@ -201,7 +201,7 @@ export async function checkAndReturnUser(
       .eq("username", username);
 
     if (response.error) {
-      console.log(response.error, "error checkUsername");
+      // console.log(response.error, "error checkUsername");
       return {
         isUserExist: false,
         user: null,
@@ -278,5 +278,27 @@ export const setSelectedIzbushka = async (
     return data || [];
   } catch (error) {
     throw new Error("Error setSelectedIzbushka: " + error);
+  }
+};
+
+export const setMarketplace = async (username: string, marketplace: string) => {
+  try {
+    const { data, error } = await supabase
+      .from("users")
+      .update({ marketplace })
+      .eq("username", username);
+  } catch (error) {
+    throw new Error("Error setMarketplace: " + error);
+  }
+};
+
+export const getMarketplace = async (username: string) => {
+  try {
+    const { data, error } = await supabase
+      .from("users")
+      .select("marketplace")
+      .eq("username", username);
+  } catch (error) {
+    throw new Error("Error getMarketplace: " + error);
   }
 };

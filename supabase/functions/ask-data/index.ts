@@ -33,7 +33,7 @@ serve(async (req: Request) => {
       match_threshold: 0.8,
       match_count: 4,
     })
-    .select("id,title,description,content,brand,url")
+    .select("id,title,url")
     .limit(4);
   console.log(items, "items");
 
@@ -41,11 +41,17 @@ serve(async (req: Request) => {
   // rpc: call PostgreSQL functions in supabase
 
   if (itemsError) {
-    console.error(itemsError, "itemsError");
-    throw new Response(`Error: ${itemsError}`, {
-      status: 400,
-      statusText: itemsError.message,
-    });
+    console.error(
+      itemsError,
+      `Error: ${itemsError.details}\n\n${itemsError.message}\n\n${itemsError.hint}`,
+    );
+    throw new Response(
+      `Error: ${itemsError.details}\n\n${itemsError.message}\n\n${itemsError.hint}`,
+      {
+        status: 400,
+        statusText: itemsError.message,
+      },
+    );
   }
   // documents is going to be all the relevant data to our specific question.
 
@@ -57,23 +63,22 @@ serve(async (req: Request) => {
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
     console.log(item, "item");
-    const content =
-      `${item.title}\n${item.content}\n${item.description}\n${item.brand}`;
+    const content = `${item.title}\n${item.url}`;
     console.log(content, "content");
     const encoded = tokenizer.encode(content);
     console.log(encoded.text.length, "encoded.text.length");
     tokenCount += encoded.text.length;
 
     // Limit context to max 1500 tokens (configurable)
-    if (tokenCount > 1500) {
+    if (tokenCount > 100000) {
       throw new Response("Context too long", { status: 400 });
     }
 
     contextText += `${content.trim()}\n`;
   }
-
+  console.log(language_code, "language_code");
   const prompt = stripIndent`${oneLine`
-  You are a neural marketplace assistant! Always answer honestly and be as helpful as possible! Your name is E-commerce Dev and your main task is to help users sell more of their products and help them find hit products on different marketplaces. Respond in ${language_code} language."`}
+  You are a neural marketplace assistant, seler and stylist! Always answer honestly and be as helpful as possible! Your name is E-commerce Dev and your main task is to help users sell more of their products and help them find hit products on different marketplaces. Respond in ${language_code} language."`}
     Context sections:
     ${contextText}
     Question: """

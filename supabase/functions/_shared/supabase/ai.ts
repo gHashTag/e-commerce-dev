@@ -13,7 +13,7 @@ export const getCompletion = async (prompt: string) => {
     const response = await openai.chat.completions.create({
       model: model_ai,
       messages: [{ role: "user", content: prompt }],
-      temperature: 0,
+      temperature: 0.8,
     });
 
     return {
@@ -48,17 +48,16 @@ export async function getAiFeedback(
 
 export async function getAiFeedbackFromSupabase(
   { query, rpc_function_name, language_code }: getAiSupabaseFeedbackT,
-): Promise<{ content: string; items: any; data: any }> {
+): Promise<{ content: string; items: any }> {
   try {
     const { data: dataItems } = await supabase.functions.invoke("ask-data", {
       body: JSON.stringify({ query, rpc_function_name, language_code }),
     });
 
-    console.log(dataItems, "dataItems");
+    console.log(dataItems.content, "---content");
     return {
-      content: dataItems.dataItems,
+      content: dataItems.content,
       items: dataItems.items,
-      data: dataItems.data,
     };
   } catch (error) {
     throw new Error(`Error receiving AI response: ${error}`);
