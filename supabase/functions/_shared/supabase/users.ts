@@ -294,10 +294,16 @@ export const setMarketplace = async (username: string, marketplace: string) => {
 
 export const getMarketplace = async (username: string) => {
   try {
-    const { data, error } = await supabase
+    const { data: marketplace, error } = await supabase
       .from("users")
       .select("marketplace")
       .eq("username", username);
+
+    if (error) {
+      throw new Error("Error getMarketplace: " + error);
+    }
+
+    return marketplace[0].marketplace;
   } catch (error) {
     throw new Error("Error getMarketplace: " + error);
   }

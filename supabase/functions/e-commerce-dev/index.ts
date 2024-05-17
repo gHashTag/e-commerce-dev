@@ -455,8 +455,6 @@ eCommerceDevBot.catch((err) => {
 Deno.serve(async (req) => {
   try {
     const url = new URL(req.url);
-    console.log(url.searchParams.get("secret"), "secret url")
-    console.log(Deno.env.get("FUNCTION_SECRET"), "secret env")
     if (url.searchParams.get("secret") !== Deno.env.get("FUNCTION_SECRET")) {
       console.log("not allowed");
       return new Response("not allowed", { status: 405 });

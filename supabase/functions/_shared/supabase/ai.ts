@@ -49,6 +49,7 @@ export async function getAiFeedback(
 export async function getAiFeedbackFromSupabase(
   { query, rpc_function_name, language_code }: getAiSupabaseFeedbackT,
 ): Promise<{ content: string; items: any }> {
+  console.log(query, rpc_function_name, language_code, "query, rpc_function_name, language_code");
   try {
     const { data: dataItems } = await supabase.functions.invoke("ask-data", {
       body: JSON.stringify({ query, rpc_function_name, language_code }),
