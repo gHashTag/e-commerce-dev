@@ -25,6 +25,7 @@ serve(async (req: Request) => {
     mean_pool: true,
     normalize: true,
   });
+  console.log(embedding, "embedding");
 
   // Query embeddings.
   const { data: items, error: itemsError } = await supabase
@@ -35,7 +36,7 @@ serve(async (req: Request) => {
     })
     .select("*")
     .limit(4);
-  console.log(items, "items");
+  // console.log(items, "items");
 
   // get the relevant documents to our question by using the match_documents
   // rpc: call PostgreSQL functions in supabase
@@ -52,9 +53,9 @@ serve(async (req: Request) => {
   // documents is going to be all the relevant data to our specific question.
 
   let tokenCount = 0;
-  console.log(tokenCount, "tokenCount");
+  // console.log(tokenCount, "tokenCount");
   let contextText = "";
-  console.log(contextText, "contextText");
+  // console.log(contextText, "contextText");
   // Concat matched documents
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
@@ -85,48 +86,35 @@ serve(async (req: Request) => {
   // console.log(prompt, "prompt");
   // get response from gpt-4o model
   const { id, content } = await getCompletion(prompt);
-
+  console.log(content, "content");
   // return the response from the model to our use through a Response
   return new Response(JSON.stringify({ id, content, items }), {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 });
 
+// -- Adding a new column 'embedding' of type 'vector(384)' to the table 'amazon_documents'
+// ALTER TABLE public.amazon_documents
+// ADD COLUMN embedding vector (384);
+
 // create index if not exists amazon_documents_embedding_idx on public.amazon_documents using hnsw (embedding vector_ip_ops) tablespace pg_default;
 
-// create or replace function match_amazon_documents (
-//   query_embedding vector(1536),
-//   match_threshold float,
-//   match_count int
-// )
-// returns table (
-//   id bigint,
-//   title text,
-//   content text,
-//   description text,
-//   brand text,
-//   price text,
-//   stars text,
-//   url text,
-//   similarity float
-// )
-// language plpgsql
-// as $$
+// -- Supabase AI is experimental and may produce incorrect answers
+// -- Always verify the output before executing
+
+// drop function if exists match_allegro_documents (vector (384), float, int);
+
+// CREATE OR REPLACE FUNCTION match_allegro_documents (
+//   embedding_vector vector (384),
+//   match_threshold FLOAT,
+//   match_count INT
+// ) RETURNS SETOF allegro_documents LANGUAGE plpgsql AS $$
 // begin
 //   return query
-//   select
-//     amazon_documents.id,
-//     amazon_documents.title,
-//     amazon_documents.content,
-//     amazon_documents.description,
-//     amazon_documents.brand,
-//     amazon_documents.price,
-//     amazon_documents.stars,
-//     amazon_documents.url,
-//     1 - (amazon_documents.embedding <=> query_embedding) as similarity
-//   from amazon_documents
-//   where 1 - (amazon_documents.embedding <=> query_embedding) > match_threshold
-//   order by similarity desc
+//   select t.*
+//   from allegro_documents t
+//   where t.embedding <#> embedding_vector < -match_threshold
+//   order by t.embedding <#> embedding_vector
 //   limit match_count;
 // end;
 // $$;

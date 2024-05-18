@@ -33,20 +33,20 @@ import { pathIncrement } from "../path-increment.ts";
 /// <reference types="https://esm.sh/@supabase/functions-js/src/edge-runtime.d.ts" />
 
 console.log("Hello from E-commerce Dev!");
-await eCommerceDevBot.api.setMyCommands([
-  {
-    command: "/start",
-    description: "Start chatting with E-commerce Dev",
-  },
-  {
-    command: "/course",
-    description: "Start test with E-commerce Dev",
-  },
-  // {
-  //   command: "/room",
-  //   description: "Create a room",
-  // },
-]);
+// await eCommerceDevBot.api.setMyCommands([
+//   {
+//     command: "/start",
+//     description: "Start chatting with E-commerce Dev",
+//   },
+//   {
+//     command: "/course",
+//     description: "Start test with E-commerce Dev",
+//   },
+//   // {
+//   //   command: "/room",
+//   //   description: "Create a room",
+//   // },
+// ]);
 
 eCommerceDevBot.command("start", async (ctx: Context) => {
   console.log("start");
@@ -108,25 +108,29 @@ eCommerceDevBot.on("message:text", async (ctx) => {
         rpc_function_name: `match_${marketplace}_documents`,
         language_code,
       });
-      console.log(items, "items");
+
       console.log("💤content", content);
       await ctx.reply(content, { parse_mode: "Markdown" });
-      await ctx.reply("Welcome! Click the button below to open the web app.", {
+
+      const buttons = items.map((item: any) => {
+        return [
+          {
+            text: `${item?.title}`,
+            web_app: { url: item?.url },
+          },
+        ];
+      });
+
+      await ctx.reply("Выберите товар, чтобы узнать больше:", {
         reply_markup: {
-          inline_keyboard: [
-            [
-              {
-                text: "Open Web App",
-                web_app: { url: "https://your-web-app-url.com" },
-              },
-            ],
-          ],
+          inline_keyboard: buttons,
         },
       });
       return;
     }
   } catch (error) {
     console.log("🚀 error", error);
+    throw new Error(`error message:text ${error}`);
   }
 });
 
