@@ -67,5 +67,5 @@
 
 ### Контакты
 
-- **Telegram:** [Ваша группа поддержки](https://t.me/e_commerce_dev_bot)
+- **Telegram:** [Ссылка на бот](https://t.me/e_commerce_dev_bot)
 - **GitHub:** [Ссылка на репозиторий](https://github.com/gHashTag/e-commerce-dev.git)
