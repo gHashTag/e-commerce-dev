@@ -21,7 +21,12 @@ import {
   updateProgress,
   updateResult,
 } from "../_shared/supabase/progress.ts";
-import { createUser, getMarketplace, getUid, setMarketplace } from "../_shared/supabase/users.ts";
+import {
+  createUser,
+  getMarketplace,
+  getUid,
+  setMarketplace,
+} from "../_shared/supabase/users.ts";
 import { pathIncrement } from "../path-increment.ts";
 
 // Setup type definitions for built-in Supabase Runtime APIs
@@ -56,15 +61,15 @@ eCommerceDevBot.command("start", async (ctx: Context) => {
     {
       reply_markup: {
         inline_keyboard: [
-          [{ text: "Amazon", callback_data: "match_amazon_documents" },
-          { text: "Etsy", callback_data: "match_etsy_documents" },
-          { text: "Ebay", callback_data: "match_ebay_documents" },
-        ],
-        [
-          { text: "Walmart", callback_data: "match_walmart_documents" },
-          { text: "Allegro", callback_data: "match_allegro_documents" },
-          { text: "All", callback_data: "match_ecommerce_documents" },
-        ]
+          [{ text: "Amazon", callback_data: "match_amazon_documents" }, {
+            text: "Etsy",
+            callback_data: "match_etsy_documents",
+          }, { text: "Ebay", callback_data: "match_ebay_documents" }],
+          [
+            { text: "Walmart", callback_data: "match_walmart_documents" },
+            { text: "Allegro", callback_data: "match_allegro_documents" },
+            { text: "All", callback_data: "match_ecommerce_documents" },
+          ],
         ],
       },
     },
@@ -82,8 +87,7 @@ eCommerceDevBot.command("course", async (ctx) => {
     {
       reply_markup: {
         inline_keyboard: [
-          [{ text: "Start test!", callback_data: "start_test" },
-        ],
+          [{ text: "Start test!", callback_data: "start_test" }],
         ],
       },
     },
@@ -97,19 +101,32 @@ eCommerceDevBot.on("message:text", async (ctx) => {
 
     const language_code = ctx.from.language_code || "en";
 
-  if (query) {
-    const marketplace = await getMarketplace(ctx.from.username || "")
-    const { content } = await getAiFeedbackFromSupabase({
-      query,
-      rpc_function_name: `match_${marketplace}_documents`,
-      language_code,
-    });
-    console.log("💤content", content)
-    await ctx.reply(content, { parse_mode: "Markdown" });
-    return;
+    if (query) {
+      const marketplace = await getMarketplace(ctx.from.username || "");
+      const { content, items } = await getAiFeedbackFromSupabase({
+        query,
+        rpc_function_name: `match_${marketplace}_documents`,
+        language_code,
+      });
+      console.log(items, "items");
+      console.log("💤content", content);
+      await ctx.reply(content, { parse_mode: "Markdown" });
+      await ctx.reply("Welcome! Click the button below to open the web app.", {
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: "Open Web App",
+                web_app: { url: "https://your-web-app-url.com" },
+              },
+            ],
+          ],
+        },
+      });
+      return;
     }
   } catch (error) {
-    console.log("🚀 error", error)
+    console.log("🚀 error", error);
   }
 });
 
@@ -122,18 +139,22 @@ eCommerceDevBot.on("callback_query:data", async (ctx) => {
 
   await ctx.editMessageReplyMarkup({ reply_markup: { inline_keyboard: [] } });
 
-  if (callbackData.endsWith("documents")){
-    console.log("setMarketplace", callbackData)
-    const marketplace = callbackData.split("_")[1]
+  if (callbackData.endsWith("documents")) {
+    console.log("setMarketplace", callbackData);
+    const marketplace = callbackData.split("_")[1];
 
-    await setMarketplace(ctx.callbackQuery.from.username || "", marketplace)
+    await setMarketplace(ctx.callbackQuery.from.username || "", marketplace);
 
-    if (marketplace === "ecommerce"){
-      await ctx.reply(isRu? `Были выбраны все площадки` : `All marketplaces were selected`)
-      return
+    if (marketplace === "ecommerce") {
+      await ctx.reply(
+        isRu ? `Были выбраны все площадки` : `All marketplaces were selected`,
+      );
+      return;
     } else {
-      await ctx.reply(isRu? `Был выбран ${marketplace}` : `${marketplace} was selected`)
-      return
+      await ctx.reply(
+        isRu ? `Был выбран ${marketplace}` : `${marketplace} was selected`,
+      );
+      return;
     }
   }
 

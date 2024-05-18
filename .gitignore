@@ -5,3 +5,7 @@ supabase/functions/.DS_Store
 
 supabase/.DS_Store
 supabase/functions/.env
+
+.env
+.env.local
+

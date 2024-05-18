@@ -33,7 +33,7 @@ serve(async (req: Request) => {
       match_threshold: 0.8,
       match_count: 4,
     })
-    .select("id,title,url")
+    .select("*")
     .limit(4);
   console.log(items, "items");
 
@@ -41,10 +41,6 @@ serve(async (req: Request) => {
   // rpc: call PostgreSQL functions in supabase
 
   if (itemsError) {
-    console.error(
-      itemsError,
-      `Error: ${itemsError.details}\n\n${itemsError.message}\n\n${itemsError.hint}`,
-    );
     throw new Response(
       `Error: ${itemsError.details}\n\n${itemsError.message}\n\n${itemsError.hint}`,
       {
@@ -62,11 +58,11 @@ serve(async (req: Request) => {
   // Concat matched documents
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
-    console.log(item, "item");
+    // console.log(item, "item");
     const content = `${item.title}\n${item.url}`;
-    console.log(content, "content");
+    // console.log(content, "content");
     const encoded = tokenizer.encode(content);
-    console.log(encoded.text.length, "encoded.text.length");
+    // console.log(encoded.text.length, "encoded.text.length");
     tokenCount += encoded.text.length;
 
     // Limit context to max 1500 tokens (configurable)
@@ -76,7 +72,7 @@ serve(async (req: Request) => {
 
     contextText += `${content.trim()}\n`;
   }
-  console.log(language_code, "language_code");
+  // console.log(language_code, "language_code");
   const prompt = stripIndent`${oneLine`
   You are a neural marketplace assistant, seler and stylist! Always answer honestly and be as helpful as possible! Your name is E-commerce Dev and your main task is to help users sell more of their products and help them find hit products on different marketplaces. Respond in ${language_code} language."`}
     Context sections:
@@ -84,9 +80,9 @@ serve(async (req: Request) => {
     Question: """
     ${query}
     """
-    Answer as simple text:
+    Answer as simple text without any links:
   `;
-  console.log(prompt, "prompt");
+  // console.log(prompt, "prompt");
   // get response from gpt-4o model
   const { id, content } = await getCompletion(prompt);
 
