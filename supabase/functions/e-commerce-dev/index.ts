@@ -378,13 +378,11 @@ eCommerceDevBot.on("callback_query:data", async (ctx) => {
           language: "all",
         });
 
-        const lastCallbackContext = await getLastCallback(language);
-        console.log(lastCallbackContext);
-        if (lastCallbackContext) {
-          const callbackResult =
-            `${language}_${lastCallbackContext.lesson_number}_${lastCallbackContext.subtopic}`;
-          if (newPath === callbackResult) {
-            const correctProcent = correctAnswers * 0.8;
+        const lastCallbackId = await getLastCallback(language);
+        console.log(lastCallbackId);
+        if (lastCallbackId) {
+          if (questions[0].id === lastCallbackId) {
+            const correctProcent = (correctAnswers / lastCallbackId) * 100;
             if (correctProcent >= 80) {
               await updateResult({
                 user_id: user_id.toString(),
