@@ -76,6 +76,38 @@ eCommerceDevBot.command("start", async (ctx: Context) => {
   );
 });
 
+eCommerceDevBot.command("video", async (ctx) => {
+  console.log("video");
+  await ctx.replyWithChatAction("upload_video"); // Отправка действия загрузки видео в чате
+  const isRu = ctx.from?.language_code === "ru";
+  const videoUrl = "https://t.me/dao999nft_storage/2"; // Замените на фактический URL видео
+  const text = isRu
+  ? `🏰 Избушка повернулась к тебе передом, а к лесу задом. Налево пойдешь - огнем согреешься, прямо пойдешь - в водичке омолодишься, а направо пойдешь - в медную трубу попадешь.`
+  : `🏰 The hut turned its front to you, and its back to the forest. If you go to the left you will be warmed by the fire, you will go straight ahead in the water and you will rejuvenate, and to the right you will go into a copper pipe.`;
+
+  await ctx.replyWithVideo(videoUrl, {
+    caption: text,
+    reply_markup: {
+      inline_keyboard: [
+        [
+          {
+            text: `🔥 ${isRu ? "Огонь" : "Fire"}`,
+            callback_data: "fire",
+          },
+          {
+            text: `💧 ${isRu ? "Вода" : "Water"}`,
+            callback_data: "water",
+          },
+          {
+            text: `🎺 ${isRu ? "Медные трубы" : "Copper pipes"}`,
+            callback_data: "copper_pipes",
+          },
+        ],
+      ],
+    },
+  });
+});
+
 eCommerceDevBot.command("course", async (ctx) => {
   console.log("course");
   await ctx.replyWithChatAction("typing");
@@ -367,7 +399,7 @@ eCommerceDevBot.on("callback_query:data", async (ctx) => {
         });
         const newPath = await pathIncrement({
           path,
-          isSubtopic: biggestSubtopic === subtopic ? false : true,
+          isSubtopic: Number(biggestSubtopic) === Number(subtopic) ? false : true,
         });
         const correctAnswers = await getCorrects({
           user_id: user_id.toString(),
